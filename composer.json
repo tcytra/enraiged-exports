@@ -1,0 +1,36 @@
+{
+    "name": "tcytra/enraiged-exports",
+    "description": "Enraiged Exports provides data exporting feature for Laravel Enraiged projects.",
+    "keywords": ["exports", "enraiged"],
+    "homepage": "https://github.com/tcytra/enraiged-core",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Todd Cytra",
+            "email": "tcytra@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^12.0",
+        "tcytra/enraiged-support": "^0.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Enraiged\\Exports\\": "src/"
+        }
+    },
+    "scripts": {
+        "post-update-cmd": [
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Enraiged\\Exports\\ExportsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
