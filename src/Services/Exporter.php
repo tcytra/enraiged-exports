@@ -89,6 +89,28 @@ class Exporter implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithH
     }
 
     /**
+     *  @param  string  $fileName
+     *  @param  string|null  $writerType
+     *  @param  array  $headers
+     *  @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     *
+     *  @throws NoFilenameGivenException
+     */
+    public function download(?string $fileName = null, ?string $writerType = null, ?array $headers = null)
+    {
+        $fileName = $fileName ?: $this->table->exportableFilename();
+
+        $writerType = $writerType ?: ucwords($this->table->exportableFiletype());
+
+        $headers = $headers ?: [
+            'content-disposition' => 'attachment; filename="'.$fileName.'"',
+            'content-type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ];
+        
+        return $this->getExporter()->download($this, $fileName, $writerType, $headers);
+    }
+
+    /**
      *  Return the column headings for the export.
      *
      *  @return array
@@ -122,7 +144,7 @@ class Exporter implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithH
     /**
      *  Execute the export process.
      *
-     *  @return \Enraiged\Exports\Models\Export
+     *  @return $this
      */
     public function process()
     {
@@ -150,16 +172,16 @@ class Exporter implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithH
         } else {
             $this->store($exportable->location, null, $this->writer());
 
-            (new AttachFileToExport($this->export, $exportable))->handle();
+            dispatch(new AttachFileToExport($this->export, $exportable));
 
-            (new AppendColumnSums($this->export, $this->columnSums(), $this->writer()))->handle();
+            dispatch(new AppendColumnSums($this->export, $this->columnSums(), $this->writer()));
 
             if (!$this->table->isAutoDownload()) {
                 (new ExportComplete($this->export))->handle();
             }
         }
 
-        return $this->export;
+        return $this;
     }
 
     /**
